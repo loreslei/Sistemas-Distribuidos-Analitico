@@ -1,78 +1,93 @@
 import math
-import random
 import matplotlib.pyplot as plt
+import numpy as np
 
-# ---------------------------------------------------------
-# 1. Cálculo Analítico (Teórico)
-# ---------------------------------------------------------
 def disponibilidade_analitica(n, k, p):
-    """Calcula a probabilidade exata usando a fórmula da Distribuição Binomial."""
-    disponibilidade_total = 0.0
+    disponibilidade = 0.0
     for i in range(k, n + 1):
-        # Combinação (n escolhe i) * p^i * (1-p)^(n-i)
         combinacao = math.comb(n, i)
         probabilidade_i = combinacao * (p ** i) * ((1 - p) ** (n - i))
-        disponibilidade_total += probabilidade_i
-    return disponibilidade_total
+        disponibilidade += probabilidade_i
+    return disponibilidade
 
-# ---------------------------------------------------------
-# 2. Simulador Estocástico (Prático/Experimental)
-# ---------------------------------------------------------
-def disponibilidade_simulada(n, k, p, num_rodadas=10000):
-    """Simula o cenário rodando milhares de testes para achar a frequência."""
-    rodadas_sucesso = 0
-    
-    for _ in range(num_rodadas):
-        servidores_disponiveis = 0
-        for _ in range(n):
-            # Gera número aleatório entre 0.0 e 1.0. Se for <= p, o servidor está UP.
-            if random.random() <= p:
-                servidores_disponiveis += 1
-                
-        # Se atingiu o quórum mínimo k, o serviço se manteve operacional
-        if servidores_disponiveis >= k:
-            rodadas_sucesso += 1
-            
-    return rodadas_sucesso / num_rodadas
+# Configuração do painel 2x3
+fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+fig.suptitle('Análise de Disponibilidade: 6 Casos de Teste de Proporções', fontsize=16)
 
-# ---------------------------------------------------------
-# 3. Execução e Geração de Gráficos e Tabelas
-# ---------------------------------------------------------
-n = 5 # Total de servidores
-probabilidades_p = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-casos_k = [1, math.ceil(n/2), n] # k=1, k=3 (maioria), k=5 (todos)
+probabilidades_p = np.linspace(0, 1, 100)
 
-print(f"Comparação para n={n}\n")
-print(f"{'p':<5} | {'k':<3} | {'Analítico':<10} | {'Simulado':<10} | {'Diferença'}")
-print("-" * 45)
+# --- Gráfico 1: Impacto de k em cluster pequeno (n=5) ---
+ax = axes[0, 0]
+n_val = 5
+for k_val in [1, 3, 5]:
+    valores = [disponibilidade_analitica(n_val, k_val, p) for p in probabilidades_p]
+    ax.plot(probabilidades_p, valores, label=f'k={k_val}', linewidth=2)
+ax.set_title("1. Alterando 'k' (Cluster Pequeno n=5)")
+ax.set_xlabel("Probabilidade do Servidor (p)")
+ax.set_ylabel("Disponibilidade do Sistema")
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.6)
 
-plt.figure(figsize=(10, 6))
+# --- Gráfico 2: Impacto de k em cluster grande (n=20) ---
+ax = axes[0, 1]
+n_val = 20
+for k_val in [1, 10, 20]:
+    valores = [disponibilidade_analitica(n_val, k_val, p) for p in probabilidades_p]
+    ax.plot(probabilidades_p, valores, label=f'k={k_val}', linewidth=2)
+ax.set_title("2. Alterando 'k' (Cluster Grande n=20)")
+ax.set_xlabel("Probabilidade do Servidor (p)")
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.6)
 
-for k in casos_k:
-    valores_analiticos = []
-    valores_simulados = []
-    
-    for p in probabilidades_p:
-        analitico = disponibilidade_analitica(n, k, p)
-        simulado = disponibilidade_simulada(n, k, p)
-        
-        valores_analiticos.append(analitico)
-        valores_simulados.append(simulado)
-        
-        # Imprime os resultados na tabela do terminal
-        diff = abs(analitico - simulado)
-        print(f"{p:.1f}   | {k:<3} | {analitico:.4f}     | {simulado:.4f}     | {diff:.4f}")
-        
-    # Plota a linha analítica e os pontos simulados para o gráfico
-    plt.plot(probabilidades_p, valores_analiticos, label=f'Analítico (k={k})', linewidth=2)
-    plt.scatter(probabilidades_p, valores_simulados, label=f'Simulado (k={k})', marker='x')
+# --- Gráfico 3: Impacto de p alterando k (Fixo n=15) ---
+ax = axes[0, 2]
+n_val = 15
+eixo_k = list(range(1, n_val + 1))
+for p_val in [0.5, 0.7, 0.9]:
+    valores = [disponibilidade_analitica(n_val, k, p_val) for k in eixo_k]
+    ax.plot(eixo_k, valores, marker='o', label=f'p={p_val}', markersize=4)
+ax.set_title("3. Queda de Disponibilidade ao aumentar 'k' (n=15)")
+ax.set_xlabel("Mínimo Necessário (k)")
+ax.set_xticks(range(1, 16, 2))
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.6)
 
-# Configurações do Gráfico 2D (similar à imagem que você enviou)
-plt.title(f'Disponibilidade do Serviço (n={n})')
-plt.xlabel('Probabilidade individual do servidor estar UP (p)')
-plt.ylabel('Disponibilidade do Sistema')
-plt.xlim(0, 1)
-plt.ylim(0, 1)
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.legend()
+# --- Gráfico 4: O peso de adicionar servidores (Fixo k=2) ---
+ax = axes[1, 0]
+k_val = 2
+eixo_n = list(range(k_val, 16))
+for p_val in [0.2, 0.5, 0.8]:
+    valores = [disponibilidade_analitica(n, k_val, p_val) for n in eixo_n]
+    ax.plot(eixo_n, valores, marker='s', label=f'p={p_val}', markersize=4)
+ax.set_title("4. Crescimento ao aumentar 'n' (k=2 Fixo)")
+ax.set_xlabel("Total de Servidores (n)")
+ax.set_ylabel("Disponibilidade do Sistema")
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.6)
+
+# --- Gráfico 5: O cenário de Quórum da Maioria (k = teto(n/2)) ---
+ax = axes[1, 1]
+cenarios_n = [3, 7, 15]
+for n_val in cenarios_n:
+    k_quorum = math.ceil(n_val / 2)
+    valores = [disponibilidade_analitica(n_val, k_quorum, p) for p in probabilidades_p]
+    ax.plot(probabilidades_p, valores, label=f'n={n_val}, k={k_quorum}', linewidth=2)
+ax.set_title("5. Escala de Quórum da Maioria (k \u2248 n/2)") # \u2248 é o símbolo de aproximação
+ax.set_xlabel("Probabilidade do Servidor (p)")
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.6)
+
+# --- Gráfico 6: O cenário de Atualização Síncrona (k = n) ---
+ax = axes[1, 2]
+eixo_n_sync = list(range(1, 11))
+for p_val in [0.9, 0.95, 0.99]:
+    valores = [disponibilidade_analitica(n, n, p_val) for n in eixo_n_sync]
+    ax.plot(eixo_n_sync, valores, marker='^', label=f'p={p_val}', markersize=5)
+ax.set_title("6. Fragilidade da Atualização (k=n)")
+ax.set_xlabel("Total de Servidores (n = k)")
+ax.set_xticks(eixo_n_sync)
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.6)
+
+plt.tight_layout()
 plt.show()
