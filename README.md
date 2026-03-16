@@ -70,6 +70,12 @@ $$
 
 # Conclusões
 
+A análise dos gráficos e tabelas permitiu observar como a disponibilidade de um serviço replicado depende diretamente dos parâmetros: número de servidores, número mínimo de servidores necessários e probabilidade de cada servidor estar disponível. A partir da dedução matemática baseada na distribuição binomial, foi possível calcular analiticamente a probabilidade de o sistema permanecer operacional, isto é, de haver pelo menos k servidores disponíveis entre os n existentes. Os resultados mostraram que, à medida que p aumenta, a disponibilidade do sistema cresce, enquanto valores maiores de k tornam o sistema mais restritivo, reduzindo sua disponibilidade.
+
+Os gráficos também evidenciam o impacto do número de servidores dependendo da estratégia adotada. No caso k = 1 (operações de consulta), aumentar o número de servidores melhora significativamente a disponibilidade, pois basta que um servidor esteja ativo. Já no caso k = n (operações de atualização), a disponibilidade tende a diminuir conforme o número de servidores cresce, pois todos precisam estar disponíveis simultaneamente. O caso intermediário, como k ≈ n/2, representa um equilíbrio entre disponibilidade e consistência, demonstrando o trade-off típico de sistemas distribuídos.
+
+Por fim, o simulador estocástico confirmou os resultados obtidos pela fórmula analítica. Ao executar um grande número de rodadas aleatórias para diferentes valores de n, k e p, a frequência experimental de disponibilidade se aproximou dos valores teóricos calculados pela fórmula. Essa convergência entre simulação e modelo matemático demonstra que a abordagem probabilística utilizada descreve adequadamente o comportamento do sistema e permite prever como diferentes configurações de replicação afetam a disponibilidade do serviço.
+
 
 # Link do Colab
 
