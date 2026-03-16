@@ -1,18 +1,3 @@
-
-
-# Fórmula
-Para deduzir a disponibilidade de um serviço replicado, tratamos o estado de cada servidor como um evento de Bernoulli independente, onde a probabilidade de sucesso (servidor estar "up") é p.
-
-$$
-P(X = i) = \binom{n}{i} p^i (1 - p)^{n-i}
-$$
-
-A disponibilidade total A é a soma das probabilidades de todos os sucessos aceitáveis
-
-$$
-A = \sum_{i=k}^{n} \binom{n}{i} p^i (1 - p)^{n-i}
-$$
-
 # Equipe
 
 | Nome                                | Matrícula             |
@@ -21,6 +6,69 @@ $$
 | João Felipe Ribeiro de Melo         | 2315045               |
 | João Pedro Ribeiro Mendes           | 2315069               |
 | Lorenna Aguiar Nunes                | 2315026               |
+
+# Fórmula
+## Dedução da Disponibilidade de um Serviço Replicado
+
+Considere:
+
+- **n**: número total de servidores  
+- **k**: número mínimo de servidores disponíveis para o serviço funcionar  
+- **p**: probabilidade de um servidor estar disponível  
+
+Assumimos que os servidores são **independentes** e possuem a **mesma probabilidade de disponibilidade**.
+
+---
+
+### Probabilidade de exatamente *i* servidores disponíveis
+
+Escolher **i servidores disponíveis entre n** pode ser feito de
+
+$$
+\binom{n}{i}
+$$
+
+formas.
+
+A probabilidade de exatamente **i servidores estarem disponíveis** e **n−i falharem** é:
+
+$$
+P(X = i) = \binom{n}{i} p^i (1 - p)^{n-i}
+$$
+
+---
+
+### Disponibilidade do sistema
+
+O sistema funciona quando **pelo menos k servidores estão disponíveis**, ou seja:
+
+$$
+X \ge k
+$$
+
+Logo, a disponibilidade total é a soma das probabilidades de todos os casos válidos:
+
+$$
+A = \sum_{i=k}^{n} \binom{n}{i} p^i (1 - p)^{n-i}
+$$
+
+---
+
+### Casos extremos
+
+**Consulta (k = 1)** — basta um servidor disponível:
+
+$$
+A = 1 - (1 - p)^n
+$$
+
+**Atualização (k = n)** — todos os servidores precisam estar disponíveis:
+
+$$
+A = p^n
+$$
+
+# Conclusões
 
 
 # Link do Colab
